@@ -1,5 +1,5 @@
 import os
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanException
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -22,6 +22,10 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def generate(self):
+        if conan_version >= "2":
+            boost = self.dependencies["boost"]
+            assert boost.buildenv_info.vars(self).get("BOOST_ROOT") == boost.package_folder
+            assert boost.runenv_info.vars(self).get("BOOST_ROOT") == boost.package_folder
         tc = CMakeToolchain(self)
         tc.cache_variables["HEADER_ONLY"] = self.dependencies["boost"].options.header_only
         if not self.dependencies["boost"].options.header_only:
